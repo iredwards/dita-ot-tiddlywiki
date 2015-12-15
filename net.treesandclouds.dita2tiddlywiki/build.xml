@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><project xmlns:dita="http://dita-ot.sourceforge.net">
+
+  <target name="tiddlywiki.init">
+    <condition property="out.ext" value=".tid">
+      <not>
+        <isset property="out.ext"/>
+      </not>
+    </condition>
+    <condition property="args.xsl" value="${dita.plugin.net.treesandclouds.dita.tiddlywiki.dir}/xsl/dita2tiddlywiki.xsl">
+      <not>
+        <isset property="args.xsl"/>
+      </not>
+    </condition>
+    <makeurl file="${dita.input.valfile}" property="dita.input.valfile.url" validate="no"/>
+    <!-- Set to "true" if you get out-of-memory errors during preprocess
+    while processing very large (thousands of files) document sets. -->
+    <condition property="dita.tiddlywiki.reloadstylesheet" value="false">
+      <not><isset property="dita.tiddlywiki.reloadstylesheet"/></not>
+    </condition>
+  </target>
+  
+
+    
+  <target name="dita2tiddlywiki" depends="build-init,                    preprocess,                     tiddlywiki.init,                    dita.topics.tiddlywiki.common,                    dita.inner.topics.tiddlywiki.common"/>
+  
+  
+  
+  <!--requirement 3, old solution-->
+  
+  <target name="dita.topics.tiddlywiki.common" unless="noTopic" if="old.transform">
+    <xslt basedir="${dita.temp.dir}" destdir="${output.dir}" includesfile="${dita.temp.dir}${file.separator}${fullditatopicfile}" reloadstylesheet="${dita.tiddlywiki.reloadstylesheet}" classpathref="dost.class.path" extension="${out.ext}" style="${args.xsl}" filenameparameter="FILENAME" filedirparameter="FILEDIR">
+      <excludesfile name="${dita.temp.dir}${file.separator}${resourceonlyfile}" if="resourceonlyfile"/>
+      <param name="TRANSTYPE" expression="${transtype}"/>
+      <param name="FILTERFILE" expression="${dita.input.valfile.url}" if="dita.input.valfile"/>
+      <param name="DRAFT" expression="${args.draft}" if="args.draft"/>
+      <param name="ARTLBL" expression="${args.artlbl}" if="args.artlbl"/>
+      <param name="GENERATE-TASK-LABELS" expression="${args.gen.task.lbl}" if="args.gen.task.lbl"/>
+      <param name="PRESERVE-DITA-CLASS" expression="${args.tiddlywiki.classattr}" if="args.tiddlywiki.classattr"/>
+      <param name="NOPARENTLINK" expression="${args.hide.parent.link}" if="args.hide.parent.link"/>
+  	  <param name="include.rellinks" expression="${include.rellinks}"/>
+      <param name="BREADCRUMBS" expression="${args.breadcrumbs}" if="args.breadcrumbs"/>
+      <param name="INDEXSHOW" expression="${args.indexshow}" if="args.indexshow"/>
+      <param name="genDefMeta" expression="${args.gen.default.meta}" if="args.gen.default.meta"/>
+      <param name="OUTEXT" expression="${out.ext}" if="out.ext"/>
+      <param name="BASEDIR" expression="${basedir}"/>
+      <param name="OUTPUTDIR" expression="${output.dir}"/>
+      <param name="DBG" expression="${args.debug}" if="args.debug"/>
+      <!--dita:extension id="dita.conductor.tiddlywiki.param" behavior="org.dita.dost.platform.InsertAction"/-->
+  	  <xmlcatalog refid="dita.catalog"/>
+    </xslt>
+  </target>
+  
+  <!--To generate&copy inner files-->
+  <!--requirement 1,2-->
+  
+  <target name="dita.inner.topics.tiddlywiki.common" unless="noTopic" if="inner.transform">
+    <xslt basedir="${dita.temp.dir}" destdir="${output.dir}" includesfile="${dita.temp.dir}${file.separator}${fullditatopicfile}" reloadstylesheet="${dita.tiddlywiki.reloadstylesheet}" classpathref="dost.class.path" extension="${out.ext}" style="${args.xsl}" filenameparameter="FILENAME" filedirparameter="FILEDIR">
+    	<excludesfile name="${dita.temp.dir}${file.separator}${resourceonlyfile}" if="resourceonlyfile"/>
+      <param name="TRANSTYPE" expression="${transtype}"/>
+      <param name="FILTERFILE" expression="${dita.input.valfile.url}" if="dita.input.valfile"/>
+      <param name="DRAFT" expression="${args.draft}" if="args.draft"/>
+      <param name="ARTLBL" expression="${args.artlbl}" if="args.artlbl"/>
+      <param name="GENERATE-TASK-LABELS" expression="${args.gen.task.lbl}" if="args.gen.task.lbl"/>
+      <param name="PRESERVE-DITA-CLASS" expression="${args.tiddlywiki.classattr}" if="args.tiddlywiki.classattr"/>
+      <param name="NOPARENTLINK" expression="${args.hide.parent.link}" if="args.hide.parent.link"/>
+      <param name="include.rellinks" expression="${include.rellinks}"/>
+      <param name="BREADCRUMBS" expression="${args.breadcrumbs}" if="args.breadcrumbs"/>
+      <param name="INDEXSHOW" expression="${args.indexshow}" if="args.indexshow"/>
+      <param name="genDefMeta" expression="${args.gen.default.meta}" if="args.gen.default.meta"/>
+      <param name="OUTEXT" expression="${out.ext}" if="out.ext"/>
+      <param name="BASEDIR" expression="${basedir}"/>
+      <param name="OUTPUTDIR" expression="${output.dir}"/>
+      <param name="DBG" expression="${args.debug}" if="args.debug"/>
+      <!--dita:extension id="dita.conductor.tiddlywiki.param" behavior="org.dita.dost.platform.InsertAction"/-->
+      <!--New,To generate&copy all dita files in the inputmap.dir, not all files in dita.temp.dir -->
+      <mapper type="regexp" from="^(${tempdirToinputmapdir.relative.value})(.*?)(\.(\w+))$$" to="\2${out.ext}"/>
+      <xmlcatalog refid="dita.catalog"/>
+    </xslt>
+  </target>
+  
+</project>
